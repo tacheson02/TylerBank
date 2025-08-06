@@ -2,12 +2,17 @@ package tylerbank.web.app.TylerBank.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
 @Builder
@@ -16,7 +21,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "bank_user")
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -50,4 +55,14 @@ public class User {
     //Relationship with Account entity
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Account> accounts;
+
+    /* Puts all roles into a stream [roles.stream()]
+     * maps each roles to new SimpleGrantedAuthority objects [.map(SimpleGrantedAuthority::new)]
+     * collects them into a list [.collect(Collectors.toList())]
+     *  returns the list of GrantedAuthority objects
+     */
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+    }
 }
