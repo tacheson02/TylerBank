@@ -16,13 +16,26 @@ import tylerbank.web.app.TylerBank.service.JwtService;
 
 import java.io.IOException;
 
-// This class validates each request for a valid JWT token and sets the security context with the user's details.
+/**
+ * This class validates each request for a valid JWT token and sets the security context with the user's details.
+ * @since v1.2
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+
+    /**
+     * Checks each request and validates the JWT token. If valid, sets the security context with the user's details.'
+     * @param request
+     * @param response
+     * @param filterChain
+     * @throws ServletException
+     * @throws IOException
+     * @since v1.2
+     */
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,

@@ -12,27 +12,41 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import tylerbank.web.app.TylerBank.repository.UserRepository;
 
-// Security configuration for the application
+/**
+ * Security configuration for the users authentication and authorization
+ * @since v1.1
+ */
 @Configuration
 @RequiredArgsConstructor
 public class AppConfig {
     private final UserRepository userRepository;
 
-    // Simply a secure way to look up username
+    /**
+     * Method to look up username
+     * @return username lookup
+     * @since v1.1
+     */
     @Bean
     public UserDetailsService userDetailsService() {
         return userRepository::findByUsernameIgnoreCase;
     }
 
-    /* Provides an instance of BCryptPasswordEncoder for password encoding.
+    /**
+     * Provides an instance of BCryptPasswordEncoder for password encoding.
      * When users are added/log-in their password is run here to hash it.
+     * @return BCryptPasswordEncoder for password encoding.
+     * @since v1.1
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // Creates a DaoAuthenticationProvider with the ability to lookup user and check password
+    /**
+     * Creates a DaoAuthenticationProvider with the ability to lookup user and check password
+     * @return
+     * @since v1.1
+     */
     @Bean
     public AuthenticationProvider authenticationProvider() {
         var daoProvider = new DaoAuthenticationProvider(passwordEncoder());
@@ -40,7 +54,13 @@ public class AppConfig {
         return daoProvider;
     }
 
-    // Exposes the AuthenticationManager for use in other parts of your application
+    /**
+     * Exposes the AuthenticationManager for use in other parts of your application
+     * @param config
+     * @return AuthenticationManager
+     * @throws Exception
+     * @since v1.1
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();

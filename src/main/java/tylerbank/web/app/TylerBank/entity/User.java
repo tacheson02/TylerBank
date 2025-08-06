@@ -14,6 +14,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+/**
+ * User entity represents a user in the banking system.
+ * @since v1.0
+ */
 @Entity
 @Builder
 @Getter
@@ -56,10 +60,13 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Account> accounts;
 
-    /* Puts all roles into a stream [roles.stream()]
-     * maps each roles to new SimpleGrantedAuthority objects [.map(SimpleGrantedAuthority::new)]
+    /**
+     * Puts all roles into a stream [roles.stream()]
+     * maps each role to new SimpleGrantedAuthority objects [.map(SimpleGrantedAuthority::new)]
      * collects them into a list [.collect(Collectors.toList())]
-     *  returns the list of GrantedAuthority objects
+     * returns the list of GrantedAuthority objects
+     * @return Collection
+     * @since v1.0
      */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

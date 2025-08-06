@@ -7,6 +7,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
+/**
+ * Transaction entity represents a single transaction made on a card
+ * @since v1.0
+ */
 @Entity
 @Builder
 @Getter

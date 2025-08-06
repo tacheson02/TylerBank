@@ -15,6 +15,10 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import tylerbank.web.app.TylerBank.filters.JwtAuthenticationFilter;
 
+/**
+ * Configuration class for security settings program wide.
+ * @since v1.2
+ */
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -23,7 +27,12 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter authFilter;
     private final AuthenticationProvider authenticationProvider;
 
-    //Defines the security filter chain for the application
+    /**
+     * Defines the security filter chain for the application
+     * @param http
+     * @throws Exception
+     * @Since v1.2
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
         //Enables Cross-Origin Resource Sharing (CORS) *Defined in method below*
@@ -50,7 +59,11 @@ public class SecurityConfig {
         return http.build();
     }
 
-    //Defines rules for CORS used in above method
+    /**
+     * Defines rules for CORS used in above method
+     * @return CorsConfigurationSource
+     * @since v1.2
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
