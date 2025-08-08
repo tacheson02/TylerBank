@@ -1,5 +1,6 @@
 package tylerbank.web.app.TylerBank.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -36,6 +37,7 @@ public class User implements UserDetails {
 
     private String firstname;
     private String lastname;
+    @JsonIgnore
     private String password;
     private Date dob;
     private long tel;
@@ -53,10 +55,12 @@ public class User implements UserDetails {
     private Card card;
 
     //Relationship with Transaction entity
+    @JsonIgnore
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Transaction> transactions;
 
     //Relationship with Account entity
+    @JsonIgnore
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Account> accounts;
 
