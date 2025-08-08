@@ -8,6 +8,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Account entity class representing a bank account
+ * @since v1.0
+ */
 @Entity
 @Builder
 @Getter

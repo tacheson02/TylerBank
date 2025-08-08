@@ -8,6 +8,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Card entity represents a card owned by a user and linked to an account.
+ * @since v1.0
+ */
 @Entity
 @Builder
 @Getter
