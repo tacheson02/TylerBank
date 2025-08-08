@@ -45,7 +45,7 @@ public class SecurityConfig {
                          * Private endpoints: everything else
                          */
                         request ->
-                        request.requestMatchers("/users/auth", "/users/register")
+                        request.requestMatchers("/user/auth", "/user/register")
                             .permitAll()
                             .anyRequest()
                             .authenticated()

@@ -36,7 +36,7 @@ public class UserController {
      * @return response with the authenticated user and authentication token.
      * @since v1.3
      */
-    @PostMapping("/authenticate")
+    @PostMapping("/auth")
     public ResponseEntity<?> authenticateUser(@RequestBody UserDto userDto){
         var authObject = userService.authenticateUser(userDto);
         return ResponseEntity.ok()
