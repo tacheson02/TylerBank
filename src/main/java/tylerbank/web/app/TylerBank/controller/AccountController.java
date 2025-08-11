@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import tylerbank.web.app.TylerBank.dto.AccountDto;
+import tylerbank.web.app.TylerBank.dto.ConversionDto;
 import tylerbank.web.app.TylerBank.dto.TransferDto;
 import tylerbank.web.app.TylerBank.entity.Account;
 import tylerbank.web.app.TylerBank.entity.Transaction;
@@ -12,6 +13,7 @@ import tylerbank.web.app.TylerBank.entity.User;
 import tylerbank.web.app.TylerBank.service.AccountService;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Control layer that exposes endpoints for Account management.
@@ -60,5 +62,29 @@ public class AccountController {
     public ResponseEntity<Transaction> transferFunds(@RequestBody TransferDto transferDto, Authentication authentication) throws Exception {
         var user = (User) authentication.getPrincipal();
         return ResponseEntity.ok(accountService.transferFunds(transferDto, user));
+    }
+
+    /**
+     * Endpoint to retrieve the currency exchange rate.
+     * @return
+     * @since v2.3
+     */
+    @GetMapping("/rates")
+    public ResponseEntity<Map<String, Double>> getExchangeRate() {
+        return ResponseEntity.ok(accountService.getExchangeRate());
+    }
+
+    /**
+     * Endpoint to convert funds between accounts.
+     * @param conversionDto
+     * @param authentication
+     * @return
+     * @throws Exception
+     * @since v2.3
+     */
+    @PostMapping("/convert")
+    public ResponseEntity<Transaction> convertFunds(@RequestBody ConversionDto conversionDto, Authentication authentication) throws Exception {
+        var user = (User) authentication.getPrincipal();
+        return ResponseEntity.ok(accountService.convertCurrency(conversionDto, user.getUid()));
     }
 }

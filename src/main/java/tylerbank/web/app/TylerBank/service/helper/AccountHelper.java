@@ -3,6 +3,7 @@ package tylerbank.web.app.TylerBank.service.helper;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import tylerbank.web.app.TylerBank.dto.ConversionDto;
 import tylerbank.web.app.TylerBank.entity.Account;
 import tylerbank.web.app.TylerBank.entity.User;
 import tylerbank.web.app.TylerBank.repository.AccountRepository;
@@ -67,5 +68,31 @@ public class AccountHelper {
         if (!receiverAccount.getCode().equals(code)) {
             throw new Exception("Receiver account is not " + code);
         }
+    }
+
+    /**
+     * Validates if the currencies in the given conversion request are different.
+     * @param conversiontDto
+     * @throws Exception
+     * @since v2.3
+     */
+    public void validateDifferentCurrency(ConversionDto conversiontDto) throws Exception {
+        if (conversiontDto.getFromCurrency().equals(conversiontDto.getToCurrency())) {
+            throw new Exception("Conversion from the same currency is not allowed");
+        }
+    }
+
+    /**
+     * Validates if all requirements for conversion is met
+     * @param conversionDto
+     * @param uid
+     * @throws Exception
+     * @since v2.3
+     */
+    public void validateConversion(ConversionDto conversionDto, String uid) throws Exception {
+        validateDifferentCurrency(conversionDto);
+        validateSufficientFunds(accountRepository.findByCodeAndOwnerUid(conversionDto.getFromCurrency(), uid)
+                .orElseThrow(() -> new Exception("Account not found"))
+                ,conversionDto.getAmount());
     }
 }
