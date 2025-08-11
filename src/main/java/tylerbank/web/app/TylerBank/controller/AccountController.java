@@ -5,7 +5,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import tylerbank.web.app.TylerBank.dto.AccountDto;
+import tylerbank.web.app.TylerBank.dto.TransferDto;
 import tylerbank.web.app.TylerBank.entity.Account;
+import tylerbank.web.app.TylerBank.entity.Transaction;
 import tylerbank.web.app.TylerBank.entity.User;
 import tylerbank.web.app.TylerBank.service.AccountService;
 
@@ -44,5 +46,19 @@ public class AccountController {
     public ResponseEntity<List<Account>> getUserAccounts(Authentication authentication) {
         var user = (User) authentication.getPrincipal();
         return ResponseEntity.ok(accountService.getUserAccounts(user.getUid()));
+    }
+
+    /**
+     * Endpoint to transfer funds between accounts.
+     * @param transferDto
+     * @param authentication
+     * @return
+     * @throws Exception
+     * @since v2.2
+     */
+    @PostMapping("/transfer")
+    public ResponseEntity<Transaction> transferFunds(@RequestBody TransferDto transferDto, Authentication authentication) throws Exception {
+        var user = (User) authentication.getPrincipal();
+        return ResponseEntity.ok(accountService.transferFunds(transferDto, user));
     }
 }

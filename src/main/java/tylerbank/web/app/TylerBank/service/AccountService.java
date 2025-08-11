@@ -1,11 +1,13 @@
 package tylerbank.web.app.TylerBank.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import tylerbank.web.app.TylerBank.dto.AccountDto;
-import tylerbank.web.app.TylerBank.entity.Account;
-import tylerbank.web.app.TylerBank.entity.User;
+import tylerbank.web.app.TylerBank.dto.TransferDto;
+import tylerbank.web.app.TylerBank.entity.*;
 import tylerbank.web.app.TylerBank.repository.AccountRepository;
+import tylerbank.web.app.TylerBank.repository.TransactionRepository;
 import tylerbank.web.app.TylerBank.service.helper.AccountHelper;
 import tylerbank.web.app.TylerBank.util.RandomUtil;
 
@@ -21,7 +23,9 @@ import java.util.List;
 public class AccountService {
 
     private final AccountRepository accountRepository;
+    private final TransactionRepository transactionRepository;
     private final AccountHelper accountHelper;
+    private final double TRANSACTION_FEE = 1.01;
 
     /**
      * Creates a new account for a user.
@@ -35,7 +39,7 @@ public class AccountService {
         long accountNumber;
 
         // Validate if account of this type and code does not already exist for the given user.
-        validateAccountNonExistence(accountDto.getCode(), user.getUid());
+        accountHelper.validateAccountNonExistence(accountDto.getCode(), user.getUid());
 
         // Generate a unique account number.
         do{
@@ -68,15 +72,51 @@ public class AccountService {
     }
 
     /**
-     * Validates if an account of the given type and code does not already exist for the given user.
-     * @param code
-     * @param uid
+     * Transfer funds between two accounts.
+     * @param transferDto
+     * @param user
+     * @return
      * @throws Exception
-     * @since v2.1
+     * @since v2.2
      */
-    public void validateAccountNonExistence(String code, String uid) throws Exception  {
-        if(accountRepository.existsByCodeAndOwnerUid(code, uid)) {
-            throw new Exception("Account of this type already exists for this user");
-        }
+    @Transactional
+    public Transaction transferFunds(TransferDto transferDto, User user) throws Exception {
+        //Create a sender and receiver accounts and fee variables.
+        var senderAccount = accountRepository.findByCodeAndOwnerUid(transferDto.getCode(), user.getUid())
+                .orElseThrow(() -> new IllegalArgumentException("Sender account not found"));
+        var receiverAccount = accountRepository.findByAccountNumber(transferDto.getRecipientAccountNumber())
+                .orElseThrow(() -> new IllegalArgumentException("Receiver account not found"));
+
+        //Validate if sender has sufficient funds and receiver account is correct type.
+        accountHelper.validateSufficientFunds(senderAccount, transferDto.getAmount()*TRANSACTION_FEE);
+        accountHelper.validateAccountType(receiverAccount, transferDto.getCode());
+
+        //Update the balances of the sender and receiver accounts.
+        senderAccount.setBalance(senderAccount.getBalance() - transferDto.getAmount()*TRANSACTION_FEE);
+        receiverAccount.setBalance(receiverAccount.getBalance() + transferDto.getAmount());
+
+        // Save the updated accounts.
+        accountRepository.saveAll(List.of(senderAccount, receiverAccount));
+
+        //Create a sender and receiver transaction for records.
+        var senderTransaction = Transaction.builder()
+                .account(senderAccount)
+                .status(Status.COMPLETED)
+                .type(Type.WITHDRAWAL)
+                .txFee(transferDto.getAmount()*TRANSACTION_FEE-transferDto.getAmount())
+                .amount(transferDto.getAmount())
+                .owner(user)
+                .build();
+        var receiverTransaction = Transaction.builder()
+                .account(receiverAccount)
+                .status(Status.COMPLETED)
+                .type(Type.DEPOSIT)
+                .txFee(0.0)
+                .amount(transferDto.getAmount())
+                .owner(receiverAccount.getOwner())
+                .build();
+
+        //Save the transactions and return the senders record.
+        return transactionRepository.saveAll(List.of(senderTransaction, receiverTransaction)).getFirst();
     }
 }
