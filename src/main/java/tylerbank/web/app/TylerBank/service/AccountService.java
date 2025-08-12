@@ -21,6 +21,7 @@ import java.util.Map;
  */
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class AccountService {
 
     private final AccountRepository accountRepository;
@@ -57,10 +58,7 @@ public class AccountService {
                 .symbol(accountDto.getSymbol())
                 .label(accountHelper.getCURRENCIES().get(accountDto.getCode()))
                 .build();
-        accountRepository.save(account);
-
-        // Return the created account.
-        return account;
+        return accountRepository.save(account);
     }
 
     /**
@@ -81,7 +79,6 @@ public class AccountService {
      * @throws Exception
      * @since v2.2
      */
-    @Transactional
     public Transaction transferFunds(TransferDto transferDto, User user) throws Exception {
         // Create a sender and receiver accounts and fee variables.
         var senderAccount = accountRepository.findByCodeAndOwnerUid(transferDto.getCode(), user.getUid())
@@ -99,25 +96,15 @@ public class AccountService {
         accountRepository.saveAll(List.of(senderAccount, receiverAccount));
 
         // Create a sender and receiver transaction for records.
-        var senderTransaction = Transaction.builder()
-                .account(senderAccount)
-                .status(Status.COMPLETED)
-                .type(Type.WITHDRAWAL)
-                .txFee(transferDto.getAmount()*TRANSACTION_FEE-transferDto.getAmount())
-                .amount(transferDto.getAmount())
-                .owner(user)
-                .build();
-        var receiverTransaction = Transaction.builder()
-                .account(receiverAccount)
-                .status(Status.COMPLETED)
-                .type(Type.DEPOSIT)
-                .txFee(0.0)
-                .amount(transferDto.getAmount())
-                .owner(receiverAccount.getOwner())
-                .build();
+        var senderTransaction = accountHelper.createAccountTransaction(transferDto.getAmount()
+                , Type.WITHDRAWAL, transferDto.getAmount()*TRANSACTION_FEE-transferDto.getAmount()
+                , senderAccount, user);
+        accountHelper.createAccountTransaction(transferDto.getAmount()
+                , Type.DEPOSIT, 0.0
+                , receiverAccount, receiverAccount.getOwner());
 
         // Save the transactions and return the senders record.
-        return transactionRepository.saveAll(List.of(senderTransaction, receiverTransaction)).getFirst();
+        return senderTransaction;
     }
 
     /**
@@ -128,7 +115,6 @@ public class AccountService {
      * @throws Exception
      * @since v2.3
      */
-    @Transactional
     public Transaction convertCurrency(ConversionDto conversionDto, String uid) throws Exception {
         // Validate the conversion request and sender's account balance.
         accountHelper.validateConversion(conversionDto, uid);
@@ -150,18 +136,11 @@ public class AccountService {
         receiverAccount.setBalance(receiverAccount.getBalance() + convertedAmount);
         accountRepository.saveAll(List.of(senderAccount, receiverAccount));
 
-        // Create a transaction for records.
-        var transaction = Transaction.builder()
-                .account(senderAccount)
-                .status(Status.COMPLETED)
-                .type(Type.WITHDRAWAL)
-                .txFee(conversionDto.getAmount()*TRANSACTION_FEE-conversionDto.getAmount())
-                .amount(conversionDto.getAmount())
-                .owner(senderAccount.getOwner())
-                .build();
-
-        // Save the transactions and return it
-        return transactionRepository.save(transaction);
+        // Create, save, and return a transaction for records.
+        return accountHelper.createAccountTransaction
+                (conversionDto.getAmount(), Type.WITHDRAWAL,
+                conversionDto.getAmount()*TRANSACTION_FEE-conversionDto.getAmount(), senderAccount,
+                senderAccount.getOwner());
     }
 
     /**

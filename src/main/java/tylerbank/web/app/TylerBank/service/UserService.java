@@ -1,5 +1,6 @@
 package tylerbank.web.app.TylerBank.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,6 +22,7 @@ import java.util.Map;
  */
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserService {
 
     private final UserRepository userRepository;

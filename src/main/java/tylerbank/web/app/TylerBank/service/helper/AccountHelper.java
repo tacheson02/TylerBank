@@ -1,12 +1,13 @@
 package tylerbank.web.app.TylerBank.service.helper;
 
+import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import tylerbank.web.app.TylerBank.dto.ConversionDto;
-import tylerbank.web.app.TylerBank.entity.Account;
-import tylerbank.web.app.TylerBank.entity.User;
+import tylerbank.web.app.TylerBank.entity.*;
 import tylerbank.web.app.TylerBank.repository.AccountRepository;
+import tylerbank.web.app.TylerBank.repository.TransactionRepository;
 
 import java.util.Map;
 
@@ -17,9 +18,11 @@ import java.util.Map;
 @Component
 @RequiredArgsConstructor
 @Getter
+@Transactional
 public class AccountHelper {
 
     private final AccountRepository accountRepository;
+    private final TransactionRepository transactionRepository;
 
     private final Map<String, String> CURRENCIES = Map.of(
             "USD", "United States Dollar",
@@ -94,5 +97,48 @@ public class AccountHelper {
         validateSufficientFunds(accountRepository.findByCodeAndOwnerUid(conversionDto.getFromCurrency(), uid)
                 .orElseThrow(() -> new Exception("Account not found"))
                 ,conversionDto.getAmount());
+    }
+
+    /**
+     * Creates a new account transaction with the given parameters
+     * @param amount
+     * @param type
+     * @param txFee
+     * @param account
+     * @param owner
+     * @return
+     * @since v2.4
+     */
+    public Transaction createAccountTransaction(double amount, Type type, double txFee, Account account, User owner) {
+        var transaction = Transaction.builder()
+                .txFee(txFee)
+                .amount(amount)
+                .type(type)
+                .status(Status.COMPLETED)
+                .owner(owner)
+                .build();
+        return transactionRepository.save(transaction);
+    }
+
+    /**
+     * Creates a new card transaction with the given parameters
+     * @param amount
+     * @param type
+     * @param txFee
+     * @param card
+     * @param owner
+     * @return
+     * @since v2.4
+     */
+    public Transaction createCardTransaction(double amount, Type type, double txFee, Card card, User owner) {
+        var transaction = Transaction.builder()
+                .txFee(txFee)
+                .amount(amount)
+                .type(type)
+                .status(Status.COMPLETED)
+                .owner(owner)
+                .card(card)
+                .build();
+        return transactionRepository.save(transaction);
     }
 }
