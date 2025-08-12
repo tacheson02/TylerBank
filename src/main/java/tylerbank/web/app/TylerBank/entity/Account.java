@@ -1,5 +1,6 @@
 package tylerbank.web.app.TylerBank.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -39,11 +40,13 @@ public class Account {
     private LocalDateTime updatedAt;
 
     //Relationship with Transaction entity
+    @JsonIgnore
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Transaction> transactions;
 
     //Relation with User Entity
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "owner_id")
     private User owner;
 }
