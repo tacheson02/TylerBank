@@ -25,7 +25,7 @@ public class CardService {
     private final CardRepository cardRepository;
     private final AccountHelper accountHelper;
     private final AccountRepository accountRepository;
-    private final TransactionRepository transactionRepository;
+    private final TransactionService transactionService;
 
     /**
      * Get the card for the given user.
@@ -78,8 +78,8 @@ public class CardService {
                 .build();
 
         //Create transaction for account withdraw and card creation
-        accountHelper.createAccountTransaction(amount, Type.WITHDRAWAL, 0.0, usdAccount, user);
-        accountHelper.createCardTransaction(amount, Type.DEPOSIT, 0.0, card, user);
+        transactionService.createAccountTransaction(amount, Type.WITHDRAWAL, 0.0, usdAccount, user);
+        transactionService.createCardTransaction(amount, Type.DEPOSIT, 0.0, card, user);
 
         //Save and return the card
         return cardRepository.save(card);
@@ -112,8 +112,8 @@ public class CardService {
         accountRepository.save(usdAccount);
 
         //Create transaction for account and card, return card transaction
-        accountHelper.createAccountTransaction(amount, Type.WITHDRAWAL, 0.0, usdAccount, user);
-        return accountHelper.createCardTransaction(amount, Type.CREDIT, 0.0, card, user);
+        transactionService.createAccountTransaction(amount, Type.WITHDRAWAL, 0.0, usdAccount, user);
+        return transactionService.createCardTransaction(amount, Type.CREDIT, 0.0, card, user);
     }
 
     /**
@@ -143,7 +143,7 @@ public class CardService {
         accountRepository.save(usdAccount);
 
         //Create transaction for account and card, return card transaction
-        accountHelper.createAccountTransaction(amount, Type.DEPOSIT, 0.0, usdAccount, user);
-        return accountHelper.createCardTransaction(amount, Type.DEBIT, 0.0, card, user);
+        transactionService.createAccountTransaction(amount, Type.DEPOSIT, 0.0, usdAccount, user);
+        return transactionService.createCardTransaction(amount, Type.DEBIT, 0.0, card, user);
     }
 }

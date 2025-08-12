@@ -98,47 +98,4 @@ public class AccountHelper {
                 .orElseThrow(() -> new Exception("Account not found"))
                 ,conversionDto.getAmount());
     }
-
-    /**
-     * Creates a new account transaction with the given parameters
-     * @param amount
-     * @param type
-     * @param txFee
-     * @param account
-     * @param owner
-     * @return
-     * @since v2.4
-     */
-    public Transaction createAccountTransaction(double amount, Type type, double txFee, Account account, User owner) {
-        var transaction = Transaction.builder()
-                .txFee(txFee)
-                .amount(amount)
-                .type(type)
-                .status(Status.COMPLETED)
-                .owner(owner)
-                .build();
-        return transactionRepository.save(transaction);
-    }
-
-    /**
-     * Creates a new card transaction with the given parameters
-     * @param amount
-     * @param type
-     * @param txFee
-     * @param card
-     * @param owner
-     * @return
-     * @since v2.4
-     */
-    public Transaction createCardTransaction(double amount, Type type, double txFee, Card card, User owner) {
-        var transaction = Transaction.builder()
-                .txFee(txFee)
-                .amount(amount)
-                .type(type)
-                .status(Status.COMPLETED)
-                .owner(owner)
-                .card(card)
-                .build();
-        return transactionRepository.save(transaction);
-    }
 }

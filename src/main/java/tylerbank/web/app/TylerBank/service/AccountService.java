@@ -25,7 +25,7 @@ import java.util.Map;
 public class AccountService {
 
     private final AccountRepository accountRepository;
-    private final TransactionRepository transactionRepository;
+    private final TransactionService transactionService;
     private final AccountHelper accountHelper;
     private final ExchangeRateService exchangeRateService;
     private final double TRANSACTION_FEE = 1.01;
@@ -96,10 +96,10 @@ public class AccountService {
         accountRepository.saveAll(List.of(senderAccount, receiverAccount));
 
         // Create a sender and receiver transaction for records.
-        var senderTransaction = accountHelper.createAccountTransaction(transferDto.getAmount()
+        var senderTransaction = transactionService.createAccountTransaction(transferDto.getAmount()
                 , Type.WITHDRAWAL, transferDto.getAmount()*TRANSACTION_FEE-transferDto.getAmount()
                 , senderAccount, user);
-        accountHelper.createAccountTransaction(transferDto.getAmount()
+        transactionService.createAccountTransaction(transferDto.getAmount()
                 , Type.DEPOSIT, 0.0
                 , receiverAccount, receiverAccount.getOwner());
 
@@ -137,7 +137,7 @@ public class AccountService {
         accountRepository.saveAll(List.of(senderAccount, receiverAccount));
 
         // Create, save, and return a transaction for records.
-        return accountHelper.createAccountTransaction
+        return transactionService.createAccountTransaction
                 (conversionDto.getAmount(), Type.WITHDRAWAL,
                 conversionDto.getAmount()*TRANSACTION_FEE-conversionDto.getAmount(), senderAccount,
                 senderAccount.getOwner());
